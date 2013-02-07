@@ -379,7 +379,7 @@ sub set_group_item {
 sub item_state_exists {
 	my $ref = shift;
 	my $state = shift;
-	return (grep $_ eq $state, @{$ref->{states}});
+	return (grep uc($_) eq uc($state), @{$ref->{states}});
 }
 
 #Sets group member item state if applicable
