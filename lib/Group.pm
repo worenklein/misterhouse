@@ -67,7 +67,7 @@ sub add {
 	my $count = 1;
 
 	for my $state (@item_states) {
-		if (grep $_ eq $state, @{$$self{states}}) {
+		if (grep uc($_) eq uc($state), @{$$self{states}}) {
 #			print "***Dupe state: $state\n";
 		}
 		elsif ($state and $state !~ /degrees/i) {
@@ -134,7 +134,7 @@ sub set {
     my $item;
     my $controller;
 
-    $x10_state = grep $_ eq $state, (split ',', $main::config_parms{x10_menu_states});
+    $x10_state = grep uc($_) eq uc($state), (split ',', $main::config_parms{x10_menu_states});
 
     my @fancy_controllers; #cm11, stargate, etc.
     my @group = @{$ref->{members}};
@@ -231,9 +231,9 @@ sub set {
 	#If the group's items in this house code are all that exist we can use "all lights on" (only if there are no appliances) or "all off"
 	#Only done if all items in group are on the same controller and there is more than one item to set for this house code (no need to optimize A1AJ to AO.)  Note that this optimization assumes that all X10 items are defined in items.mht.
 
-	 if ($house_code_item_count{$hc} == $house_code_group_item_count{$hc} and ($state eq 'off' or ($state eq 'on' and $house_code_group_appliance_count{$hc} == 0)) and $#fancy_controllers == 0 and $house_code_item_count{$hc} > 1) {
-		print "Setting $hc to $state with " . (($state eq 'on')?'All Lights On':'All Off') . "\n" if ($main::Debug{group});
-	        &Serial_Item::send_x10_data($controller, 'X' . $hc . (($state eq 'on')?'O':'P'));
+	 if ($house_code_item_count{$hc} == $house_code_group_item_count{$hc} and (lc($state) eq 'off' or (lc($state) eq 'on' and $house_code_group_appliance_count{$hc} == 0)) and $#fancy_controllers == 0 and $house_code_item_count{$hc} > 1) {
+		print "Setting $hc to $state with " . ((lc($state) eq 'on')?'All Lights On':'All Off') . "\n" if ($main::Debug{group});
+	        &Serial_Item::send_x10_data($controller, 'X' . $hc . ((lc($state) eq 'on')?'O':'P'));
 
 	 }
          else {
@@ -315,7 +315,7 @@ sub aggregate_states {
 
 	}
 	for $state (@aggregate_states) {
-		push @{$ref->{states}}, $state if !(grep $_ eq $state, @{$ref->{states}}) and $state and $state !~ /\x20degrees$/i;
+		push @{$ref->{states}}, $state if !(grep uc($_) eq uc($state), @{$ref->{states}}) and $state and $state !~ /\x20degrees$/i;
 
 	}
 	return @aggregate_states;
