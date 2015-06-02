@@ -11,7 +11,7 @@ our $mainHash=\%::Serial_Ports;
 
 @Serial_Item::ISA = ('X10_Interface');
 our @supported_interfaces=qw!cm11 BX24 Homevision HomeBase Stargate HouseLinc
-	Marrick cm17 Lynx10PLC weeder wish ti103 ncpuxa!;
+	Marrick cm17 2412n Lynx10PLC weeder wish ti103 ncpuxa!;
 
 sub new {
 	my ($class, $id, $state, $device_name) = @_;
@@ -196,10 +196,19 @@ sub send_x10_data {
         &Lynx10PLC::send_plc($main::Serial_Ports{Lynx10PLC}{object},
                              $serial_data, $module_type);
     }
+    elsif ($interface eq '2412n') {
+	if ( $isfunc ) {
+	    use X2412N;
+	    X2412N::send($x10_save_unit, $serial_data);
+	}
+    }
     elsif ($interface eq 'cm17') {
-                                # cm17 wants A1K, not XA1AK
-        &ControlX10::CM17::send($main::Serial_Ports{cm17}{object},
-                                substr($x10_save_unit, 1) . substr($serial_data, 2)) if $isfunc;
+	# cm17 wants A1K, not XA1AK
+	my $Command  = substr($x10_save_unit, 1) . substr($serial_data, 2);
+	if ($isfunc) {
+	    ::print_log("Sending $Command");
+	    &ControlX10::CM17::send($main::Serial_Ports{cm17}{object}, $Command);
+	}
     }
     elsif ($interface eq 'homevision') {
                                 # homevision wants XA1AK
